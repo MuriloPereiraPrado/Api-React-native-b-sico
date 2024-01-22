@@ -1,118 +1,124 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Alert, ScrollView, Image, Button, TouchableOpacity } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const pokemonList = [
+  {id:1, nome:"Bulbasauro"},
+  {id:4, nome:"Charmander"},
+  {id:7, nome:"Squirtle"}
+];
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+export default function App(){
+  const[pokeEscolhido, setPokeescolhido] = useState(null);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+  const getPokemonData = (idPokemon) => {
+    const endpoint = `https://pokeapi.co/api/v2/pokemon/${idPokemon}`;
+
+    fetch(endpoint).then(resposta => resposta.json()).then(json => {
+      const pokemon = {
+        nome : json.name,
+        img : json.sprites.other["official-artwork"].front_default,
+        peso : json.weight,
+      };
+
+      setPokeescolhido(pokemon);
+    }).catch(() => {
+      Alert.alert('erro', 'Não foi possível carregar os dados do pokemon');
+    });
+  }
+  return(
+    <View style={styles.container}>
+      <ScrollView >
+        <View style={styles.boxtitle}>
+          <Text style={styles.title}> Escolha seu Pokemon</Text>
+        </View>
+
+        {pokeEscolhido != null && (
+          <View style={styles.boxDados}>
+            <View style={styles.boxPN}>
+              <Text style={styles.text}>Nome : {pokeEscolhido.nome}</Text>
+              <Text style={styles.text}>Peso : {pokeEscolhido.peso}</Text>
+            </View>
+            <View>
+                <Image resizeMode='stretch' source={{uri:pokeEscolhido.img}} style={styles.Image}/>
+            </View>
+          </View>
+        )}
+        {pokemonList.map( pokemon => (
+          <View style={styles.boxChoice}>
+            <TouchableOpacity style={styles.button} onPress={ () => getPokemonData(pokemon.id) }>
+              <Text>Dados do {pokemon.nome}</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container:{
+    flex:1,
+    alignItems:'center',
+    justifyContent:'center',
+    backgroundColor:"#ffffffff"
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  sroll:{
+    flex:1,
+    alignItems:'center',
+    justifyContent:'center'
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  boxtitle:{
+    width:400,
+    height:50,
+    alignItems:'center',
+    justifyContent:'center',
+    marginBottom:50,
+    backgroundColor:"#000000e1",
+    borderBottomLeftRadius:15,
+    borderBottomRightRadius:15
   },
-  highlight: {
-    fontWeight: '700',
+  title:{
+    fontSize:20,
+    color:"#ffffff"
   },
+  boxDados:{
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center',
+    height:100,
+    width:400,
+    marginBottom:50,
+    borderRadius:50,
+    elevation:10,
+    shadowColor:'#212422'
+  },
+  button:{
+    width:200,
+    height:50,
+    margin:20,
+    backgroundColor:'#fafafa',
+    elevation:5,
+    shadowColor:'#000000',
+    alignItems:'center',
+    justifyContent:'center',
+    borderRadius:10
+  },
+  boxChoice:{
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  Image:{
+    width:150,
+    height:150
+  },
+  boxPN:{
+    marginRight:20
+  },
+  text:{
+    fontSize:20,
+    color:'#000000'
+  }
 });
 
-export default App;
